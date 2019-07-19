@@ -333,9 +333,41 @@ class BertVector:
 
 
 if __name__ == "__main__":
+    from numpy import dot
+    from numpy.linalg import norm
+    import heapq
+    import time
+
     bert = BertVector()
+    enClassSet = {}
+    # questionSet = ['航空', '机场', '辅政', '敎育', '邮政', '船政', '出入口', '卫生',
+    #                '天文','警察', '移民', '工务', '水务', '华民政务', '库房', '园林',
+    #                '广播', '高等法院', '律政司', '租务法院','田土厅', '婚姻注册', '物产管理', '消防',
+    #                '渔务', '薪金调查', '物资统制', '交通', '税务','运输','渠务',
+    #                ]
+    # classSet = ['交通挤塞', '斑马线', '辅助线', '违例停泊', '交通灯', '讯号声响',
+    #                '公共交通工具、小巴、九巴、城巴','营运公司',
+    #                '男','女','国王','王后','公主','王子','皇上','皇后',
+    #             ]
+    classSet = ['体育', '财经', '房产', '家居', '教育', '科技', '时尚', '时政', '游戏', '娱乐']
+    # sentimentAnalysisSet = ['好', '中立', '坏']
+    print("有" + str(len(classSet)) + "类")
+    encodetimeStart = time.time()
+    enClassSet = bert.encode(classSet)
+    # enSA = bert.encode(sentimentAnalysisSet)
+    encodetimeEnd = time.time()
+    print("Encoding classes takes " + str(encodetimeEnd - encodetimeStart)+"seconds")
 
     while True:
         question = input('question: ')
-        v = bert.encode([question])
-        print(str(v))
+        encodetimeStart = time.time()
+        vectors = bert.encode([question])[0]
+        encodetimeEnd = time.time()
+        print("Encoding the question take " + str(encodetimeEnd-encodetimeStart) + "seconds")
+
+        # similarity
+        cosClass = []
+        for index,item in enumerate(enClassSet):
+            cos_sim = dot(item, vectors) / (norm(item) * norm(vectors))
+            cosClass.append((classSet[index], cos_sim))
+        print("主题    ：" + str(heapq.nlargest(5, cosClass, key= lambda item: item[1])))
